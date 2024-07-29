@@ -5,10 +5,7 @@ import { liveblocks } from "../liveblocks";
 import { revalidatePath } from "next/cache";
 import { parseStringify } from "../utils";
 
-export const createDocument = async ({
-  userId,
-  email,
-}: CreateDocumentParams) => {
+export const createDocument = async ({ userId, email, }: CreateDocumentParams) => {
   const roomId = nanoid();
 
   try {
@@ -36,13 +33,7 @@ export const createDocument = async ({
   }
 };
 
-export const getDocument = async ({
-  roomId,
-  userId,
-}: {
-  roomId: string;
-  userId: string;
-}) => {
+export const getDocument = async ({roomId,userId,}: {roomId: string; userId: string;}) => {
   try {
     const room = await liveblocks.getRoom(roomId);
 
@@ -74,3 +65,13 @@ export const updateDocument = async (roomId: string, title: string) => {
     console.log(`Error happened while updating a room: ${error}`);
   }
 }
+
+export const getDocuments = async (email: string ) => {
+  try {
+    const rooms = await liveblocks.getRooms({ userId: email});
+
+    return parseStringify(rooms);
+  } catch (error) {
+    console.log(`Error happened while getting rooms: ${error}`);
+  }
+};
