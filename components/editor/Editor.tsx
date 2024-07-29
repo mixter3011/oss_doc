@@ -16,6 +16,7 @@ import Loader from '../Loaders';
 
 import FloatingToolbarPlugin from './plugins/FloatingToolbarPlugin';
 import { useThreads } from '@liveblocks/react/suspense';
+import Comments from '../Comments';
 
 function Placeholder() {
   return <div className="editor-placeholder">Enter some rich text...</div>;
@@ -63,6 +64,7 @@ export function Editor({roomId, currentUserType} : {roomId: string, currentUserT
           <LiveblocksPlugin>
             <FloatingComposer className='w-[350px]'/>
             <FloatingThreads threads={threads}/>
+            <Comments/>
           </LiveblocksPlugin>
         
         </div>
