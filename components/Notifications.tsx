@@ -1,28 +1,29 @@
 "use client";
 
 import {
+  useInboxNotifications,
+  useUnreadInboxNotificationsCount,
+} from "@liveblocks/react/suspense";
+import {
+  InboxNotification,
+  InboxNotificationList,
+  LiveblocksUIConfig,
+} from "@liveblocks/react-ui";
+import Image from "next/image";
+import { ReactNode } from "react";
+
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  InboxNotificationList,
-  LiveblocksUIConfig,
-  InboxNotification,
-} from "@liveblocks/react-ui";
-import {
-  useInboxNotifications,
-  useUnreadInboxNotificationsCount,
-} from "@liveblocks/react/suspense";
-import Image from "next/image";
-import React, { ReactNode } from "react";
 
-const Notification = () => {
+export const Notifications = () => {
   const { inboxNotifications } = useInboxNotifications();
   const { count } = useUnreadInboxNotificationsCount();
 
   const unreadNotifications = inboxNotifications.filter(
-    (notification) => !notification.readAt
+    (notification) => !notification.readAt // Filter unread notifications
   );
 
   return (
@@ -38,65 +39,69 @@ const Notification = () => {
           <div className="absolute right-2 top-2 z-20 size-2 rounded-full bg-blue-500" />
         )}
       </PopoverTrigger>
-      <PopoverContent>
+      <PopoverContent align="end" className="shad-popover">
         <LiveblocksUIConfig
           overrides={{
-            INBOX_NOTIFICATION_TEXT_MENTION: (user: ReactNode) => (
-              <>{user} mentioned you</>
-            ),
+            INBOX_NOTIFICATION_TEXT_MENTION: (user: ReactNode) => {
+              return <>{user} mentioned you</>;
+            },
           }}
         >
           <InboxNotificationList>
             {unreadNotifications.length <= 0 && (
               <p className="py-2 text-center text-dark-500">
-                No new notifications
+                No notifications yet
               </p>
             )}
 
             {unreadNotifications.length > 0 &&
-              unreadNotifications.map((notification) => (
+              unreadNotifications.map((inboxNotification: any) => (
                 <InboxNotification
-                  key={notification.id}
-                  inboxNotification={notification}
+                  key={inboxNotification.id}
+                  inboxNotification={inboxNotification}
                   className="bg-dark-200 text-white"
-                  href={`/documents/${notification.roomId}`}
+                  href={`/documents/${inboxNotification.roomId}`}
                   showActions={false}
                   kinds={{
                     thread: (props) => (
                       <InboxNotification.Thread
                         {...props}
+                        showRoomName={false}
                         showActions={false}
-                        showRoomName={false}
                       />
                     ),
-                    textMention: (props) => (
-                      <InboxNotification.TextMention
-                        {...props}
-                        showRoomName={false}
-                      />
-                    ),
-                    $documentAccess: (props) => (
-                      <InboxNotification.Custom
-                        {...props}
-                        title={props.inboxNotification.activities[0].data.title}
-                        aside={
-                          <InboxNotification.Icon className="bg-transparent">
-                            <Image
-                              src={
-                                (props.inboxNotification.activities[0].data
-                                  .avatar as string) || ""
-                              }
-                              width={36}
-                              height={36}
-                              alt="avatar"
-                              className="rounded-full"
-                            />
-                          </InboxNotification.Icon>
-                        }
-                      >
-                        {props.children}
-                      </InboxNotification.Custom>
-                    ),
+                    textMention: (props) => {
+                      return (
+                        <InboxNotification.TextMention
+                          {...props}
+                          showRoomName={false}
+                        />
+                      );
+                    },
+                    $documentAccess: (props) => {
+                      const { title, avatar } =
+                        props.inboxNotification.activities[0].data;
+
+                      return (
+                        <InboxNotification.Custom
+                          {...props}
+                          title={title}
+                          aside={
+                            <InboxNotification.Icon className="bg-transparent">
+                              <Image
+                                src={(avatar as string) || ""}
+                                width={36}
+                                height={36}
+                                alt="avatar"
+                                className="rounded-full"
+                              />
+                            </InboxNotification.Icon>
+                          }
+                        >
+                          {props.children}
+                        </InboxNotification.Custom>
+                      );
+                    },
                   }}
                 />
               ))}
@@ -107,4 +112,4 @@ const Notification = () => {
   );
 };
 
-export default Notification;
+export default Notifications;
